@@ -6,21 +6,21 @@ import random
 
 class ReplayBuffer:
     def __init__(self, capacity):
-        self.buffer = collections.deque(maxlen=capacity) 
+        self.buffer = collections.deque(maxlen=capacity)
 
-    def add(self, state, action, reward, next_state, done): 
-        self.buffer.append((state, action, reward, next_state, done)) 
+    def add(self, state, action, reward, next_state, done):
+        self.buffer.append((state, action, reward, next_state, done))
 
-    def sample(self, batch_size): 
+    def sample(self, batch_size):
         transitions = random.sample(self.buffer, batch_size)
         state, action, reward, next_state, done = zip(*transitions)
-        return np.array(state), action, reward, np.array(next_state), done 
+        return np.array(state), action, reward, np.array(next_state), done
 
-    def size(self): 
+    def size(self):
         return len(self.buffer)
 
 def moving_average(a, window_size):
-    cumulative_sum = np.cumsum(np.insert(a, 0, 0)) 
+    cumulative_sum = np.cumsum(np.insert(a, 0, 0))
     middle = (cumulative_sum[window_size:] - cumulative_sum[:-window_size]) / window_size
     r = np.arange(1, window_size-1, 2)
     begin = np.cumsum(a[:window_size-1])[::2] / r
@@ -34,11 +34,11 @@ def train_on_policy_agent(env, agent, num_episodes):
             for i_episode in range(int(num_episodes/10)):
                 episode_return = 0
                 transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'dones': []}
-                state = env.reset()
+                state, _ = env.reset()
                 done = False
                 while not done:
                     action = agent.take_action(state)
-                    next_state, reward, done, _ = env.step(action)
+                    next_state, reward, done, _, _= env.step(action)
                     transition_dict['states'].append(state)
                     transition_dict['actions'].append(action)
                     transition_dict['next_states'].append(next_state)
@@ -87,4 +87,4 @@ def compute_advantage(gamma, lmbda, td_delta):
         advantage_list.append(advantage)
     advantage_list.reverse()
     return torch.tensor(advantage_list, dtype=torch.float)
-                
+
